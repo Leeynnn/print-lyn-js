@@ -24,7 +24,7 @@ class Print {
     return new Promise((resolve, reject) => {
       if (id) {
         if (typeof id !== 'string') {
-          reject('new Print()时需传入打印容器id名')
+          reject('Print.print()时，options需传入打印容器id名')
         } else {
           this.dom = document.getElementById(id)
         }
@@ -32,7 +32,7 @@ class Print {
 
       if (style) {
         if (typeof style !== 'string') {
-          reject('new Print()时需传入打印容器样式标签字符串')
+          reject('Print.print()时，options需传入打印容器样式标签字符串')
         } else {
           this.style = style
         }
@@ -40,7 +40,7 @@ class Print {
 
       if (css) {
         if (typeof css !== 'string' && toString.call(css) !== '[object Array]') {
-          reject('new Print()时需传入打印容器外联样式字符串或字符串数组')
+          reject('Print.print()时，options需传入打印容器外联样式字符串或字符串数组')
         } else {
           if (typeof css === 'string') {
             if (this.cssObj[css]) {
