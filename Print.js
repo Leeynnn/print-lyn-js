@@ -13,6 +13,7 @@ class Print {
     this.dom = null
     this.style = ''
     this.css = ''
+    this.cssObj = {}
   }
 
   init(options) {
@@ -38,17 +39,42 @@ class Print {
       }
 
       if (css) {
-        if (typeof css !== 'string') {
-          reject('new Print()时需传入打印容器外联样式字符串')
+        if (typeof css !== 'string' && toString.call(css) !== '[object Array]') {
+          reject('new Print()时需传入打印容器外联样式字符串或字符串数组')
         } else {
-          axios.get(css).then(data => {
-            if (this.style) {
-              this.style = this.style.replace('<style>', `<style>${data.data}`)
+          if (typeof css === 'string') {
+            if (this.cssObj[css]) {
+              this.cssInStyle(this.cssObj[css])
+              resolve()
             } else {
-              this.style = `<style>${data.data}</style>`
+              axios.get(css).then(data => {
+                this.cssObj[css] = data.data
+                this.cssInStyle(this.cssObj[css])
+                resolve()
+              })
             }
-            resolve()
-          })
+          } else {
+            const self = this
+            var getContent = async function () {
+              let content = ''
+              for (let i = 0; i < css.length; i++) {
+                const item = css[i]
+                if (self.cssObj[item]) {
+                  content += self.cssObj[item]
+                } else {
+                  await axios.get(item).then(data => {
+                    self.cssObj[item] = data.data
+                    content += self.cssObj[item]
+                  })
+                }
+              }
+              return content
+            }
+            getContent().then(content => {
+              self.cssInStyle(content)
+              resolve()
+            })
+          }
         }
       } else {
         resolve()
@@ -95,6 +121,14 @@ class Print {
 
   getContent() {
     return `${this.style}${this.dom.outerHTML}`
+  }
+
+  cssInStyle(content) {
+    if (this.style) {
+      this.style = this.style.replace('<style>', `<style>${content}`)
+    } else {
+      this.style = `<style>${content}</style>`
+    }
   }
 }
 
