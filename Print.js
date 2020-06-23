@@ -120,7 +120,14 @@ class Print {
   }
 
   getContent() {
-    return `${this.style}${this.dom.outerHTML}`
+    const dom = this.dom.cloneNode(true)
+    const children = dom.children
+    for (let i = 0; i < children.length; i++) {
+      if (children[i].className.indexOf('no-print') !== -1) {
+        children[i].remove()
+      }
+    }
+    return `${this.style}${dom.outerHTML}`
   }
 
   cssInStyle(content) {
